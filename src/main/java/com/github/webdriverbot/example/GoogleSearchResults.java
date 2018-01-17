@@ -1,10 +1,12 @@
 package com.github.webdriverbot.example;
 
+import com.github.webdriverbot.metamodel.GenerateMetaModel;
 import java.util.List;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import com.github.webdriverbot.BotPage;
+import com.github.webdriverbot.pagefactory.BotPage;
 
+@GenerateMetaModel
 public class GoogleSearchResults extends BotPage {
 
     @FindBy(xpath = "//h3[@class = 'r']/a")

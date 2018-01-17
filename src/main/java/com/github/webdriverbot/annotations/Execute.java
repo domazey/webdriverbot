@@ -1,7 +1,5 @@
 package com.github.webdriverbot.annotations;
 
-import com.github.webdriverbot.ActionEnum;
-
 public @interface Execute {
 
     Locate click() default @Locate();
