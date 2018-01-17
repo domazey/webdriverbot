@@ -15,8 +15,8 @@ public class Example {
 
         init();
 
-        GoogleSearchPage googleSearchPage = openPage(GoogleSearchPage.class);
-        type("pizza", googleSearchPage.searchField);
+        openPage(GoogleSearchPage.class);
+        type("pizza", GoogleSearchPage_.searchField.class);
         click(GoogleSearchPage_.submitButton.class);
 
         List<String> urls = new ArrayList<>();
