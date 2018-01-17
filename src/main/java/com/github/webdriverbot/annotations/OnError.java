@@ -17,6 +17,6 @@ public @interface OnError {
     public String[] handlerArgs() default {};
     
     //or this
-    public Action action() default @Action(type = ActionEnum.NULL);
+    public Action action() default @Action(action = ActionEnum.NONE);
 }
 

@@ -1,5 +1,7 @@
 package com.github.webdriverbot;
 
+import static com.github.webdriverbot.BotBot.*;
+import com.github.webdriverbot.annotations.RedirectTo;
 import com.github.webdriverbot.exceptions.InvalidAnnotationConfigurationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,6 +32,9 @@ public class ExtendedLocatingElementHandler extends LocatingElementHandler {
     public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
         proxy = null;
         ExtendedWebElementInterpreter elemInterpreter = new ExtendedWebElementInterpreter(elementLocator, botContext, elemField, webDriver);
+        
+        elemInterpreter.checkPreconditions();
+        
         onErrorAttempts = elemInterpreter.getOnErrorAttempts();
         Throwable failCause = null;
         onErrorPerformed = false;
@@ -50,6 +55,13 @@ public class ExtendedLocatingElementHandler extends LocatingElementHandler {
 
         if (failCause != null) {
             throw failCause;
+        }
+        
+        //TODO: make this handle-aware. I don't know if "click" can open new tab, but beware of "sendKeys"
+        if(method.getName().equals("click")) {
+            if(elemField.getAnnotation(RedirectTo.class) != null) {
+                WebDriverBotContext.setPage(currentWindowHandle(), elemField.getAnnotation(RedirectTo.class).value());
+            }
         }
 
         return proxy;

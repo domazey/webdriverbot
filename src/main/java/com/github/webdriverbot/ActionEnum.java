@@ -1,9 +1,14 @@
 package com.github.webdriverbot;
 
 public enum ActionEnum {
-    NULL,
-    CLICK,
-    REFRESH,
-    OPEN,
-    TYPE
+    NONE,
+    CLICK, //TODO: remove
+    REFRESH, //TODO: remove
+    OPEN, //TODO: remove
+    TYPE, //TODO: remove
+    
+    NAVIGATE_BACK,
+    NAVIGATE_FORWARD,
+    NAVIGATE_REFRESH,
+    WAIT
 }

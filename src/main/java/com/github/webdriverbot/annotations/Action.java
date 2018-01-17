@@ -13,7 +13,7 @@ import org.openqa.selenium.support.FindBys;
 @Target(ElementType.FIELD)
 public @interface Action {
     // mandatory field
-    public ActionEnum type();
+    public ActionEnum action();
 
     // if action uses locator, use use of these
     public FindBy findBy() default @FindBy();

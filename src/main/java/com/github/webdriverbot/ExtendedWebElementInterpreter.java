@@ -8,10 +8,13 @@ import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 import com.github.webdriverbot.annotations.Action;
 import com.github.webdriverbot.annotations.OnErrorAttempts;
+import com.github.webdriverbot.annotations.Precondition;
+import com.github.webdriverbot.annotations.Preconditions;
 import com.github.webdriverbot.exceptions.InvalidAnnotationConfigurationException;
 import java.util.Arrays;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.pagefactory.ElementLocator;
 
 public class ExtendedWebElementInterpreter {
@@ -55,7 +58,7 @@ public class ExtendedWebElementInterpreter {
         }
 
         Action[] actions = null;
-        if (annotation.action().type() != ActionEnum.NULL) {
+        if (annotation.action().action() != ActionEnum.NONE) {
             actions = new Action[]{annotation.action()};
         } else {
             actions = annotation.value();
@@ -76,7 +79,7 @@ public class ExtendedWebElementInterpreter {
 
     private void handleActions(Action[] actions, Throwable originalException) throws RuntimeException {
         for (Action action : actions) {
-            switch (action.type()) {
+            switch (action.action()) {
                 case OPEN: {
                     String arg = getArgArgument(action, originalException);
                     driver.get(arg);
@@ -89,7 +92,7 @@ public class ExtendedWebElementInterpreter {
                 }
                 break;
                 case TYPE: {
-                    // use other types + safe type
+                    // use other types + safe action
                     String xpath = getFindByLocator(action, originalException);
                     driver.findElement(By.xpath(xpath)).sendKeys(getArgArgument(action, originalException));
                 }
@@ -143,6 +146,87 @@ public class ExtendedWebElementInterpreter {
 
     private String getFindByLocator(Action action, Throwable originalException) {
         return action.findBy().xpath(); //todo rest
+    }
+
+    void checkPreconditions() {
+        Preconditions preconditionsAnnotation = elemField.getAnnotation(Preconditions.class);
+
+        if(preconditionsAnnotation == null) {
+            return;
+        }
+        Precondition[] preconditions = preconditionsAnnotation.value();
+
+        for (Precondition precond : preconditions) {
+
+            if(!checkPrecondition(precond)) {
+                //for now only throwing exception
+                throw new RuntimeException("Precondition failed.\nPrecondition: " 
+                        + precond.toString() 
+                        + "\nFor element: " 
+                        + elemField.getDeclaringClass() 
+                        + "$" 
+                        + elemField.getName());
+            }
+
+        }
+    }
+
+    private boolean checkPrecondition(Precondition precond) {
+        
+        switch (precond.cond()) {
+            case NONE:
+                return false;
+            case ELEMENT_PRESENT: {
+                //TODO: handle other locators
+                if ("".equals(precond.elem())) {
+                    return false; //throw some malformed annotation exception
+                }
+
+                return checkElementPresentPrecondition(precond.elem());
+            }
+
+            default:
+                throw new AssertionError();
+        }
+        
+    }
+
+    private boolean checkElementPresentPrecondition(String elem) {
+        String[] splitted = elem.split("\\$");
+        
+        if(splitted.length != 2) {
+            throw new RuntimeException("@Precondition \"elem\" value {" + elem + "} is malformed (class/field $ separator is missing)");
+        }
+        
+        Class enclosingClass;
+        Field preconditionField;  
+        try {
+            enclosingClass = Class.forName(splitted[0]);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException("@Precondition \"elem\" value malformed (class for name \"" + splitted[0] + "\" not found", ex);
+        }
+        
+        try {
+            preconditionField = enclosingClass.getDeclaredField(splitted[1]);
+        } catch (NoSuchFieldException ex) {
+            throw new RuntimeException("@Precondition \"elem\" value malformed (there is no \"" + splitted[1] + "\" field in class " + splitted[0] + ")", ex);
+        } catch (SecurityException ex) {
+            throw new RuntimeException("@Precondition failed. You don't have access to this field\"" + splitted[1] + "\" from class " + splitted[0] + ")", ex);
+        }
+        
+        FindBy findBy = preconditionField.getAnnotation(FindBy.class);
+        if(findBy == null) {
+            throw new RuntimeException("Temporarily only @FindBy annotation is handled for preconditions elements");
+        }
+
+         //handling only xpath for now
+        String xpath = findBy.xpath();
+        if ("".equals(xpath)) {
+            throw new RuntimeException("Temporarily only xpath argument of @FindBy annotation can be handled for preconditions");
+        }
+
+        return !driver.findElements(By.xpath(xpath)).isEmpty();
+        
     }
 
 }
