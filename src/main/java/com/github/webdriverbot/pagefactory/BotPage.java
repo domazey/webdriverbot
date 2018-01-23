@@ -6,7 +6,7 @@ import static com.github.webdriverextensions.Bot.driver;
 import com.github.webdriverextensions.WebPage;
 import org.openqa.selenium.support.PageFactory;
 
-public class BotPage extends WebPage {
+public abstract class BotPage extends WebPage {
 
     @Override
     public void open(Object... arguments) {

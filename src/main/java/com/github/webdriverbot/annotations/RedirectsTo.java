@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface RedirectTo {
+public @interface RedirectsTo {
     Class<? extends BotPage> value();
 }

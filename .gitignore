@@ -14,3 +14,4 @@ buildNumber.properties
 /drivers/
 /nb-configuration.xml
 /licenseheader.txt
+/src/main/java/com/github/webdriverbot/internal/

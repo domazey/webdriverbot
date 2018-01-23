@@ -1,20 +1,27 @@
 package com.github.webdriverbot.bot;
 
+import com.github.webdriverbot.annotations.ParametrizedUrl;
 import com.github.webdriverbot.context.WebDriverBotContext;
 import com.github.webdriverbot.decorator.WDBByDecoratorFactory;
 import com.github.webdriverbot.pagefactory.BotPage;
 import com.github.webdriverbot.annotations.Url;
+import com.github.webdriverbot.annotations.UrlParam;
 import com.github.webdriverbot.exceptions.NewWindowNotOpenedException;
 import com.github.webdriverbot.exceptions.WebDriverBotException;
 import com.github.webdriverbot.metamodel.RepositoryMetaData;
 import com.github.webdriverextensions.Bot;
-import com.github.webdriverextensions.internal.BotUtils;
 import static com.github.webdriverextensions.internal.BotUtils.asNanos;
 import com.sun.jna.Platform;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -30,7 +37,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class BotBot extends Bot {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BotBot.class);
-    
+
     /**
      * Clicks link and redirects result to new tab
      *
@@ -149,6 +156,13 @@ public class BotBot extends Bot {
             open(webPageClass.getAnnotation(Url.class).value());
         }
 
+        if (webPageClass.getDeclaredAnnotation(ParametrizedUrl.class) != null) {
+            ParametrizedUrl parametrizedUrl = webPageClass.getDeclaredAnnotation(ParametrizedUrl.class);
+            UrlParam[] urlParams = webPageClass.getDeclaredAnnotationsByType(UrlParam.class);
+            String url = generateUrl(parametrizedUrl, urlParams);
+            open(url);
+        }
+
         WebDriverBotContext.setPage(currentWindowHandle(), webPageClass);
 
         return (U) WebDriverBotContext.getPage(currentWindowHandle());
@@ -221,22 +235,19 @@ public class BotBot extends Bot {
         return getDecoratedElement(getByFromMetamodel(metaElemClass));
     }
 
+    public static void quitDriver() {
+        driver().quit();
+    }
 
-    
-    
     /* Click */
     public static void click(Class metaElemClass) {
         click(getDecoratedElement(metaElemClass));
     }
 
-
-
     /* Double Click */
     public static void doubleClick(Class metaElemClass) {
         doubleClick(getDecoratedElement(metaElemClass));
     }
-
-
 
     /* Type */
     public static void type(String text, Class metaElemClass) {
@@ -246,8 +257,6 @@ public class BotBot extends Bot {
     public static void type(double number, Class metaElemClass) {
         type(number, getDecoratedElement(metaElemClass));
     }
-
-
 
     /* Clear */
     public static void clear(Class metaElemClass) {
@@ -263,8 +272,6 @@ public class BotBot extends Bot {
         type(number, getDecoratedElement(metaElemClass));
     }
 
-
-
     /* Press Keys */
     public static void pressEnter(Class metaElemClass) {
         pressEnter(getDecoratedElement(metaElemClass));
@@ -273,8 +280,6 @@ public class BotBot extends Bot {
     public static void pressKeys(Class metaElemClass, CharSequence... keys) {
         pressKeys(getDecoratedElement(metaElemClass));
     }
-
-
 
     /* Select/Deselect */
     public static void select(Class metaElemClass) {
@@ -317,8 +322,6 @@ public class BotBot extends Bot {
         Bot.deselectOptionWithIndex(index, getDecoratedElement(metaElemClass));
     }
 
-
-
     /* Check/Uncheck */
     public static void check(Class metaElemClass) {
         check(getDecoratedElement(metaElemClass));
@@ -327,8 +330,6 @@ public class BotBot extends Bot {
     public static void uncheck(Class metaElemClass) {
         uncheck(getDecoratedElement(metaElemClass));
     }
-
-
 
     public static void waitForElementToDisplay(Class metaElemClass) {
         waitForElementToDisplay(getDecoratedElement(metaElemClass));
@@ -2133,5 +2134,72 @@ public class BotBot extends Bot {
 //            throw new WebAssertionError("Option with index " + quote(index) + " is not deselected", getDecoratedElement(metaElemClass));
 //        }
 //    }
+    private static String generateUrl(ParametrizedUrl parametrizedUrl, UrlParam[] urlParams) {
+        String url = replacePropertyGetParameters(parametrizedUrl.value());
+        url = replaceUrlParamGetParameters(url, urlParams);
+        url = replacePropertyParamaters(url);
+        url = replaceUrlParamParameters(url, urlParams);
+        return url;
+    }
+
+    private static String replacePropertyGetParameters(String url) {
+        Pattern p = Pattern.compile("\\{\\{(.*?)\\}\\}");
+        Matcher m = p.matcher(url);
+        List<String> params = new ArrayList<>();
+        while (m.find()) {
+            params.add(m.group().replace("{", "").replace("}", ""));
+        }
+        for (String param : params) {
+            url = url.replace("{{" + param + "}}", param + "=" + WebDriverBotContext.getBotProperty(param) + "&");
+        }
+        return url;
+    }
+
+    private static String replaceUrlParamGetParameters(String url, UrlParam[] urlParams) {
+        Map<String, String> mappedParams = new LinkedHashMap<>();
+        for (UrlParam param : urlParams) {
+            mappedParams.put(param.key(), param.value());
+        }
+        Pattern p = Pattern.compile("\\[\\[(.*?)\\]\\]");
+        Matcher m = p.matcher(url);
+        List<String> params = new ArrayList<>();
+        while (m.find()) {
+            params.add(m.group().replace("[", "").replace("]", ""));
+        }
+        for (String param : params) {
+            url = url.replace("[[" + param + "]]", param + "=" + mappedParams.get(param) + "&");
+        }
+        return url;
+    }
+
+    private static String replacePropertyParamaters(String url) {
+        Pattern p = Pattern.compile("\\{(.*?)\\}");
+        Matcher m = p.matcher(url);
+        List<String> params = new ArrayList<>();
+        while (m.find()) {
+            params.add(m.group().replace("{", "").replace("}", ""));
+        }
+        for (String param : params) {
+            url = url.replace("{" + param + "}", (String) WebDriverBotContext.getBotProperty(param));
+        }
+        return url;
+    }
+
+    private static String replaceUrlParamParameters(String url, UrlParam[] urlParams) {
+        Map<String, String> mappedParams = new LinkedHashMap<>();
+        for (UrlParam param : urlParams) {
+            mappedParams.put(param.key(), param.value());
+        }
+        Pattern p = Pattern.compile("\\[(.*?)\\]");
+        Matcher m = p.matcher(url);
+        List<String> params = new ArrayList<>();
+        while (m.find()) {
+            params.add(m.group().replace("[", "").replace("]", ""));
+        }
+        for (String param : params) {
+            url = url.replace("[" + param + "]", mappedParams.get(param));
+        }
+        return url;
+    }
 
 }

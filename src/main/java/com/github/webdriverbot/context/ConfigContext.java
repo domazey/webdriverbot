@@ -1,5 +1,6 @@
 package com.github.webdriverbot.context;
 
+import com.github.webdriverbot.exceptions.WebDriverBotException;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigContext {
@@ -7,7 +8,7 @@ public class ConfigContext {
     private int findAttempts = 1;
     private int onErrorAttempts = 1;
     private double findDelay = 500;
-    
+
     private TimeUnit findDelayUnit = TimeUnit.MILLISECONDS;
 
     public int getFindAttempts() {

@@ -4,12 +4,12 @@ import com.github.webdriverbot.context.ConfigContext;
 import com.github.webdriverbot.proxy.handler.interpret.FieldElementInterpreter;
 import com.github.webdriverbot.context.WebDriverBotContext;
 import static com.github.webdriverbot.bot.BotBot.*;
-import com.github.webdriverbot.annotations.RedirectTo;
 import com.github.webdriverbot.exceptions.InvalidAnnotationConfigurationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.pagefactory.ElementLocator;
+import com.github.webdriverbot.annotations.RedirectsTo;
 
 public class FieldElementHandler extends AbstractElementHandler {
     
@@ -49,8 +49,8 @@ public class FieldElementHandler extends AbstractElementHandler {
         
         //TODO: make this handle-aware. I don't know if "click" can open new tab, but beware of "sendKeys"
         if(method.getName().equals("click")) {
-            if(elemField.getAnnotation(RedirectTo.class) != null) {
-                WebDriverBotContext.setPage(currentWindowHandle(), elemField.getAnnotation(RedirectTo.class).value());
+            if(elemField.getAnnotation(RedirectsTo.class) != null) {
+                WebDriverBotContext.setPage(currentWindowHandle(), elemField.getAnnotation(RedirectsTo.class).value());
             }
         }
 

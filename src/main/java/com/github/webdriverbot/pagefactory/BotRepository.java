@@ -7,7 +7,7 @@ import com.github.webdriverextensions.WebDriverExtensionsContext;
 import com.github.webdriverextensions.WebRepository;
 import org.openqa.selenium.support.PageFactory;
 
-public class BotRepository extends WebRepository {
+public abstract class BotRepository extends WebRepository {
 
     public BotRepository() {
         PageFactory.initElements(new WDBFieldDecoratorFactory().create(driver()), this);

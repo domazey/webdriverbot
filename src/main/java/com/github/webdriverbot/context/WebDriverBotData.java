@@ -9,9 +9,11 @@ import com.github.webdriverbot.exceptions.WebDriverBotException;
 public class WebDriverBotData {
 
     private final Map<String, BotPage> mappedHandlesPages;
+    private final Map<String, Object> propertyMap;
 
     public WebDriverBotData() {
         mappedHandlesPages = new LinkedHashMap<>();
+        propertyMap = new LinkedHashMap<>();
     }
 
     public void setPageForHandle(String handle, Class<? extends BotPage> botPageClass) {
@@ -60,6 +62,28 @@ public class WebDriverBotData {
         }
 
         return result;
+    }
+
+    public void setProperty(String key, Object value) {
+        propertyMap.put(key, value);
+    }
+
+    public Object getProperty(String key) {
+        if(!propertyMap.keySet().contains(key)) {
+            throw new WebDriverBotException("failed to get property [" + key + "] from WebDriverBotContext. Property doesn't exist");
+        }
+        return propertyMap.get(key);
+    }
+
+    public <U> Object getProperty(String key, Class<U> propertyClass) {   
+        return (U) getProperty(key);
+    }
+    
+    public void removeProperty(String key) {
+        if(!propertyMap.keySet().contains(key)) {
+            throw new WebDriverBotException("failed to remove property [" + key + "] from WebDriverBotContext. Property doesn't exist");
+        }
+        propertyMap.remove(key);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.github.webdriverbot.example;
+package com.github.webdriverbot.examples.example1;
 
 import static com.github.webdriverbot.bot.BotBot.*;
 import com.github.webdriverbot.context.WebDriverBotContext;
@@ -15,11 +15,16 @@ public class Example {
 
         init();
 
-        openPage(GoogleSearchPage.class);
+        openPage(GoogleSearchPage.class); // no need to store page in variable
+        
         type("pizza", GoogleSearchPage_.searchField.class);
+        
         click(GoogleSearchPage_.submitButton.class);
 
         List<String> urls = new ArrayList<>();
+        
+        // opens each link in new tab, performs operation, and closes that tab
+        // It's made to prevent list invalidation (can't iterate over list if the page changed)
         forEachRedirect(GoogleSearchResults_.links.class, () -> {
             urls.add(currentUrl());
         });
@@ -27,15 +32,14 @@ public class Example {
         System.out.println("Found urls: " + urls);
 
         driver().quit();
-
     }
 
     private static void init() {
         DriverPathLoader.loadDriverPaths(null); // use default fields
         WebDriver driver = new FirefoxDriver(); //random driver
-        driver.manage().window().maximize();
         WebDriverExtensionsContext.setDriver(driver);
-        WebDriverBotContext.init();
+        driver().manage().window().maximize();
+        WebDriverBotContext.initBotData();
     }
 
 }

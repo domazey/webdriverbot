@@ -1,5 +1,5 @@
 
-package com.github.webdriverbot.example;
+package com.github.webdriverbot.examples.example1;
 
 import com.github.webdriverbot.metamodel.RepositoryMetaData;
 
