@@ -17,3 +17,6 @@ Extension for WebDriver project
      - js values
      - screenshots (o_O)
      - position and relation to other elements
+     
+Ideas:
+- inputTextFromElement(Element target, Element source)
