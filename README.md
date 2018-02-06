@@ -18,5 +18,50 @@ Extension for WebDriver project
      - screenshots (o_O)
      - position and relation to other elements
      
-Ideas:
+Ideas (Api based): 
 - inputTextFromElement(Element target, Element source)
+
+Ideas (JS based):
+- getInnerHtml(WebElement elem) // gets inner html
+- getOuterHtml(WebElement elem) // gets outer html
+- setInnerHtml(WebElement elem, String html) // sets html of element
+- setInnerHtml(WebElement target, WebElement source) // sets of based on other element
+- setInnerHtml(WebElement target, WebElement source, Function<String, String> htmlModifier)
+// getAttribute is already defined
+- setAttribute(WebElement elem, String attribute, String value)
+- copyAttribute(WebElement target, WebElement source, String attribute)
+- copyAttribute(WebElement target, WebElement source, String attribute, Function<String, String> attributeModifier)
+- copyAttributes(WebElement target, WebElement source)
+- getStyleProperty(WebElement elem, String property)
+- setStyleProperty(WebElement elem, String property, String value)
+- copyStyleProperty(WebElement target, WebElement source, String property)
+- copyStyleProperty(WebElement target, WebElement source, String property, Function<String, String> propertyModifier)
+- deleteElement(WebElement element)
+- createElement(...)
+- appendChild(WebElement root, ...)
+- removeChild(WebElement root, ...)
+- replaceChild(WebElement root, ...)
+- replaceElement(WebElement target, WebElement source)
+- replaceElement(WebElement target, String htmlSource)
+- write(String text) //writes to html output stream
+... 
+all Finding HTML Objects from https://www.w3schools.com/js/js_htmldom_document.asp
+all listeners (onclick) for definining on dom, and adapters for java
+more element functions from: https://www.w3schools.com/jsref/dom_obj_all.asp
+events are from here: https://www.w3schools.com/jsref/dom_obj_event.asp
+style object functions: https://www.w3schools.com/jsref/dom_obj_style.asp
+more here: https://www.w3schools.com/jsref/
+...
+referrer
+- findElementByPosition(int x, int y)
+- findElementByStyle(...)
+- findElementByText(String text)
+- elementLeftOf(WebElement element)
+- elementTopOf(WebElement elemenet)
+- elementRightOf(WebElement element)
+- elementBottomOf(WebElement eleement)
++ maybe some constraints and additional arguments
+more location based elements
+...
+useful: http://javascript.info/coordinates
+
